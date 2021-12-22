@@ -1,7 +1,6 @@
 """Provide an enum for the types of token accepted by the lexer and parser"""
 
 import dataclasses
-
 import enum
 
 

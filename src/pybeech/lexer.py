@@ -1,10 +1,9 @@
 """Provide a class for lexing Beech tokens"""
 
-import enum
 import re
 
-from .token import Token, TokenTypes, TOKEN_PATTERNS
-from .errors import BeechSyntaxError
+from src.pybeech.errors import BeechSyntaxError
+from src.pybeech.beech_token import Token, TokenTypes, TOKEN_PATTERNS
 
 
 class Lexer:
@@ -36,3 +35,35 @@ class Lexer:
             token, token_pointer = self._scan(token_pointer)
             tokens.append(token)
         return tokens
+
+
+def _file_mode(filename: str):
+    with open(filename) as file:
+        source_code = file.read()
+    lexer = Lexer(source_code)
+    print(*lexer.tokenize(), sep="\n")
+
+
+def _interactive_mode():
+    print("Interactive mode\nEnter '!q' or '!quit' to quit")
+    while True:
+        line = input().rstrip()
+        if line.lower() in ("!q", "!quit"):
+            break
+        try:
+            print(*Lexer(line).tokenize(), sep="\n")
+        except BeechSyntaxError as e:
+            print(e)
+
+
+def main():
+    from sys import argv
+
+    if len(argv) == 1:
+        _interactive_mode()
+    else:
+        _file_mode(argv[1])
+
+
+if __name__ == "__main__":
+    main()

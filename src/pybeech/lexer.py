@@ -36,7 +36,7 @@ class Token:
 
 class Lexer:
     """A class to lex Beech source files on the fly."""
-    def __init__(self, source: str):
+    def __init__(self, source: str) -> None:
         self._source: str = source
         self._index: int = 0
 
@@ -46,7 +46,7 @@ class Lexer:
         start: int = self._index
         return Token(type=token_type, start_index=start, length=self._index - start, rest=self._source[start:])
 
-    def _advance(self):
+    def _advance(self) -> None:
         self._index += 1
 
     def _peek(self) -> str:

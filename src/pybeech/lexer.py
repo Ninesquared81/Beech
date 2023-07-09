@@ -44,10 +44,25 @@ class Lexer:
         """Get the next valid token in the source file."""
         token_type: TokenType = TokenType.EMPTY
         start: int = self._index
+
         return Token(type=token_type, start_index=start, length=self._index - start, rest=self._source[start:])
 
     def _advance(self) -> None:
         self._index += 1
+        if self._is_at_end():
+            raise EOFError("Unexpected EOF when scanning token.")
+
+    def _is_at_end(self) -> bool:
+        return self._index >= len(self._source)
+
+    def _match(self, c: str) -> bool:
+        if self._is_at_end() or self._peek() != c:
+            return False
+        self._advance()
+        return True
 
     def _peek(self) -> str:
-        pass
+        try:
+            return self._source[self._index]
+        except IndexError:
+            raise EOFError("Unexpected EOF when scanning token.")

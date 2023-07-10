@@ -104,7 +104,13 @@ class Lexer:
             return  # No more whitespaces found
 
     def _is_reserved(self) -> bool:
-        return self._peek() in set("'\"{}()")
+        return self._check("~{") or self._peek() in "'\"{}()#"
+
+    def _is_symbolic(self) -> bool:
+        if self._is_at_end():
+            return False
+        c = self._peek()
+        return c.isprintable() and not c.isspace() and not self._is_reserved()
 
     def _match(self, seq: str) -> bool:
         if not self._check(seq):
@@ -174,7 +180,5 @@ class Lexer:
             self._advance()
 
     def _symbol(self) -> None:
-        while not self._peek().isspace() and not self._is_reserved():
-            if not self._peek().isprintable():
-                raise LexError(f"Illegal character in symbol.")
+        while self._is_symbolic():
             self._advance()

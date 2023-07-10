@@ -43,6 +43,14 @@ class Lexer:
         self._source: str = source
         self._index: int = 0
 
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self._is_at_end():
+            raise StopIteration
+        return self.next_token()
+
     def next_token(self) -> Token:
         """Get the next valid token in the source file."""
         token_type: TokenType = TokenType.EMPTY

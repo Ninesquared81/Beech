@@ -47,6 +47,8 @@ class Lexer:
             raise StopIteration
         return self.next_token()
 
+    def __bool__(self) -> bool:
+        return not self._is_at_end()
 
     def next_token(self) -> Token:
         """Get the next valid token in source."""

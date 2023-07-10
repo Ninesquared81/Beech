@@ -25,11 +25,8 @@ A string literal is delimited by matching quote marks (either double `"` or sing
 * `\t` &ndash; tab
 * `\0` &ndash; NUL byte
 
-### Numeric Literals
-Beech supports integer and floating point numeric types.
+### Symbols
+Any other sequence of non-space, non-reserved, printable characters is a _symbol_.
 
-An integer literal is a sequence of one or more of the digits 0&ndash;9. Hexadecimal integer literals may be prefixed with `0x` and contain the digits 0&ndash;9 and the characters a&ndash;f and A&ndash;F (case may be freely mixed inside the literal).
-
-A floating point literal may contain the digits 0&ndash;9 and up to 1 decimal separator (`.`). The decimal point may appear at the beginning or end of the literal, or in between digits. An 'exponent part' may also be included, which appears at the end of the literal. The exponent part starts with the letter `e` (case-insensitive), followed by an integer literal.
-
-Both integer and floating point literals may be signed, denoted by a leading `+` or `-` sign.
+### Comments
+There are two types of comment in Beech: line comments and block comments. Line comments start with `#` and run to the end of the line (like Python comments). Block comments start with `~{` and end with `}~` and can be nested.

@@ -24,7 +24,7 @@ class TokenType(enum.Enum):
         return self != type(self).EMPTY
 
 
-@dataclass(kw_only=True)
+@dataclass
 class Token:
     """A Beech syntax token."""
     type: TokenType
@@ -73,9 +73,9 @@ class Lexer:
         return Token(type=token_type, start_index=start, length=self._index - start, rest=self._source[start:])
 
     def _advance(self) -> None:
-        self._index += 1
         if self._is_at_end():
             raise LexError("Unexpected EOF when scanning token.")
+        self._index += 1
 
     def _is_at_end(self) -> bool:
         return self._index >= len(self._source)
@@ -97,7 +97,7 @@ class Lexer:
             return  # No more whitespaces found
 
     def _is_reserved(self) -> bool:
-        return self._peek() not in set("'\"{}()")
+        return self._peek() in set("'\"{}()")
 
     def _match(self, c: str) -> bool:
         if not self._check(c):
@@ -140,8 +140,11 @@ class Lexer:
                     opener = self._previous()
                 else:
                     raise LexError("Unterminated string literal.")
-            elif not self._peek().isprintable():
+            elif self._peek().isprintable():
+                self._advance()
+            else:
                 raise LexError(f"Illegal character in string literal: {hex(ord(self._peek()))}")
+
         raise LexError("Unterminated string literal.")
 
     def _comment(self) -> None:
@@ -160,9 +163,7 @@ class Lexer:
             self._advance()
 
     def _symbol(self) -> None:
-        while not self._peek().isspace():
-            if self._is_reserved():
-                raise LexError(f"Cannot use reserved character {self._peek()} in symbol.")
+        while not self._peek().isspace() and not self._is_reserved():
             if not self._peek().isprintable():
                 raise LexError(f"Illegal character in symbol.")
             self._advance()

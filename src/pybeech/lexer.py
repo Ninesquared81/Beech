@@ -59,8 +59,13 @@ class Lexer:
             value = self._string()
         elif self._match("#"):
             token_type = TokenType.COMMENT
-            self._comment()
-        elif self._peek().isalnum():
+            self._comment_line()
+        elif self._match("~{"):
+            token_type = TokenType.COMMENT
+            self._comment_block()
+        elif self._match("}~"):
+            raise LexError("Unmatched '}~'")
+        elif self._is_symbolic():
             token_type = TokenType.SYMBOL
             self._symbol()
         elif self._match("{"):
@@ -169,8 +174,8 @@ class Lexer:
             self._comment_line()
 
     def _comment_block(self) -> None:
-        while not (self._match("}") and self._match("#")):
-            if self._match("#") and self._match("{"):
+        while not self._match("}~"):
+            if self._match("~{"):
                 self._comment_block()
 
     def _comment_line(self) -> None:

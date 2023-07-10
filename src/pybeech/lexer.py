@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 import enum
 
+from .errors import LexError
+
 
 class TokenType(enum.Enum):
     """Enum for a token's type."""
@@ -14,6 +16,7 @@ class TokenType(enum.Enum):
     RIGHT_BRACKET = "')' token"
     STRING = "string token"
     SYMBOL = "symbol token"
+    COMMENT = "comment token"
 
     EMPTY = "empty token"
 
@@ -45,18 +48,59 @@ class Lexer:
         token_type: TokenType = TokenType.EMPTY
         start: int = self._index
 
+        self._consume_whitespace()
+
+        if self._match('"') or self._match("'"):
+            token_type = TokenType.STRING
+            self._string()
+        elif self._match("#"):
+            token_type = TokenType.COMMENT
+            self._comment()
+        elif self._peek().isalnum():
+            token_type = TokenType.SYMBOL
+            self._symbol()
+        elif self._match("{"):
+            token_type = TokenType.LEFT_BRACE
+        elif self._match("}"):
+            token_type = TokenType.RIGHT_BRACE
+        elif self._match("("):
+            token_type = TokenType.LEFT_BRACKET
+        elif self._match(")"):
+            token_type = TokenType.RIGHT_BRACKET
+        else:
+            raise LexError(f"Invalid character {self._peek()}")
+
         return Token(type=token_type, start_index=start, length=self._index - start, rest=self._source[start:])
 
     def _advance(self) -> None:
         self._index += 1
         if self._is_at_end():
-            raise EOFError("Unexpected EOF when scanning token.")
+            raise LexError("Unexpected EOF when scanning token.")
 
     def _is_at_end(self) -> bool:
         return self._index >= len(self._source)
 
+    def _check(self, c: str):
+        if not self._is_at_end() and self._peek() == c:
+            return True
+        return False
+
+    def _consume_whitespace(self) -> None:
+        while not self._is_at_end():
+            # Match any whitespace characters
+            if self._match(" "):
+                continue
+            if self._match("\t"):
+                continue
+            if self._match("\n"):
+                continue
+            return  # No more whitespaces found
+
+    def _is_reserved(self) -> bool:
+        return self._peek() not in set("'\"{}()")
+
     def _match(self, c: str) -> bool:
-        if self._is_at_end() or self._peek() != c:
+        if not self._check(c):
             return False
         self._advance()
         return True
@@ -65,4 +109,60 @@ class Lexer:
         try:
             return self._source[self._index]
         except IndexError:
-            raise EOFError("Unexpected EOF when scanning token.")
+            raise LexError("Unexpected EOF when scanning token.")
+
+    def _previous(self) -> str:
+        assert self._index > 0, "No previous character."
+        return self._source[self._index - 1]
+
+    def _string(self) -> str:
+        opener: str = self._previous()
+        out_string: str = ""
+        start_index: int = self._index
+        while not self._is_at_end():
+            if self._match("\\"):
+                out_string += self._source[start_index:self._index - 1]
+                start_index = self._index + 1  # Index of character after escape character.
+                if self._check("\n"):
+                    continue  # Handle the multiline string separately.
+                # Note: generator expression used for lazy evaluation.
+                if not any(self._match(c) for c in "'\"\\nrtb"):
+                    raise LexError("Invalid escape sequence.")
+            elif self._match(opener):
+                out_string += self._source[start_index:self._index - 1]
+                return out_string  # End of string.
+            elif self._match("\n"):
+                # Multiline string.
+                out_string += self._source[start_index:self._index]
+                self._consume_whitespace()
+                start_index = self._index
+                if not self._is_at_end() and (self._match("'") or self._match('"')):
+                    opener = self._previous()
+                else:
+                    raise LexError("Unterminated string literal.")
+            elif not self._peek().isprintable():
+                raise LexError(f"Illegal character in string literal: {hex(ord(self._peek()))}")
+        raise LexError("Unterminated string literal.")
+
+    def _comment(self) -> None:
+        if self._match("{"):
+            self._comment_block()
+        else:
+            self._comment_line()
+
+    def _comment_block(self) -> None:
+        while not (self._match("}") and self._match("#")):
+            if self._match("#") and self._match("{"):
+                self._comment_block()
+
+    def _comment_line(self) -> None:
+        while not self._is_at_end() and not self._check("\n"):
+            self._advance()
+
+    def _symbol(self) -> None:
+        while not self._peek().isspace():
+            if self._is_reserved():
+                raise LexError(f"Cannot use reserved character {self._peek()} in symbol.")
+            if not self._peek().isprintable():
+                raise LexError(f"Illegal character in symbol.")
+            self._advance()

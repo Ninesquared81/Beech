@@ -76,7 +76,7 @@ class Lexer:
             token_type = TokenType.LEFT_BRACKET
         elif self._match(")"):
             token_type = TokenType.RIGHT_BRACKET
-        else:
+        elif not self._is_at_end():
             raise LexError(f"Invalid character {self._peek()}")
 
         return Token(type=token_type, start_index=start, value=value or self._source[start:self._index])

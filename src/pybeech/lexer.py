@@ -81,18 +81,16 @@ class Lexer:
 
         return Token(type=token_type, start_index=start, value=value or self._source[start:self._index])
 
-    def _advance(self) -> None:
-        if self._is_at_end():
-            raise LexError("Unexpected EOF when scanning token.")
-        self._index += 1
+    def _advance(self, n: int = 1) -> None:
+        # Don't check for end of source. This is checked by the lexer anyway
+        self._index += n
 
     def _is_at_end(self) -> bool:
         return self._index >= len(self._source)
 
-    def _check(self, c: str):
-        if not self._is_at_end() and self._peek() == c:
-            return True
-        return False
+    def _check(self, seq: str):
+        # Note: slice will be empty if already at the end.
+        return seq == self._source[self._index:self._index + len(seq)]
 
     def _consume_whitespace(self) -> None:
         while not self._is_at_end():
@@ -108,10 +106,10 @@ class Lexer:
     def _is_reserved(self) -> bool:
         return self._peek() in set("'\"{}()")
 
-    def _match(self, c: str) -> bool:
-        if not self._check(c):
+    def _match(self, seq: str) -> bool:
+        if not self._check(seq):
             return False
-        self._advance()
+        self._advance(len(seq))
         return True
 
     def _peek(self) -> str:

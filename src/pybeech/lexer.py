@@ -33,8 +33,7 @@ class Token:
     rest: str
 
     def value(self) -> str:
-        end = self.start_index + self.length
-        return self.rest[self.start_index:end]
+        return self.rest[:self.length]
 
 
 class Lexer:
@@ -53,10 +52,10 @@ class Lexer:
 
     def next_token(self) -> Token:
         """Get the next valid token in the source file."""
+        self._consume_whitespace()
+
         token_type: TokenType = TokenType.EMPTY
         start: int = self._index
-
-        self._consume_whitespace()
 
         if self._match('"') or self._match("'"):
             token_type = TokenType.STRING

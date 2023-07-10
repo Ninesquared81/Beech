@@ -29,11 +29,7 @@ class Token:
     """A Beech syntax token."""
     type: TokenType
     start_index: int
-    length: int
-    rest: str
-
-    def value(self) -> str:
-        return self.rest[:self.length]
+    value: str
 
 
 class Lexer:
@@ -56,10 +52,11 @@ class Lexer:
 
         token_type: TokenType = TokenType.EMPTY
         start: int = self._index
+        value: str = ""
 
         if self._match('"') or self._match("'"):
             token_type = TokenType.STRING
-            self._string()
+            value = self._string()
         elif self._match("#"):
             token_type = TokenType.COMMENT
             self._comment()
@@ -77,7 +74,7 @@ class Lexer:
         else:
             raise LexError(f"Invalid character {self._peek()}")
 
-        return Token(type=token_type, start_index=start, length=self._index - start, rest=self._source[start:])
+        return Token(type=token_type, start_index=start, value=value or self._source[start:self._index])
 
     def _advance(self) -> None:
         if self._is_at_end():

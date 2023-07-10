@@ -113,10 +113,8 @@ class Lexer:
         return True
 
     def _peek(self) -> str:
-        try:
-            return self._source[self._index]
-        except IndexError:
-            raise LexError("Unexpected EOF when scanning token.")
+        # Use a slice to return "" if already at end.
+        return self._source[self._index:self._index + 1]
 
     def _previous(self) -> str:
         assert self._index > 0, "No previous character."

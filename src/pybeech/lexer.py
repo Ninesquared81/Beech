@@ -17,6 +17,7 @@ class TokenType(enum.Enum):
     STRING = "string token"
     SYMBOL = "symbol token"
     COMMENT = "comment token"
+    WHITESPACE = "whitespace token"
 
     EMPTY = "empty token"
 
@@ -46,15 +47,19 @@ class Lexer:
             raise StopIteration
         return self.next_token()
 
-    def next_token(self) -> Token:
-        """Get the next valid token in the source file."""
-        self._consume_whitespace()
 
+    def next_token(self) -> Token:
+        """Get the next valid token in source."""
         token_type: TokenType = TokenType.EMPTY
         start: int = self._index
         value: str = ""
 
-        if self._match('"') or self._match("'"):
+        # An empty token is returned if already at the end of tokens.
+
+        if self._peek().isspace():
+            token_type = TokenType.WHITESPACE
+            self._consume_whitespace()
+        elif self._match('"') or self._match("'"):
             token_type = TokenType.STRING
             value = self._string()
         elif self._match("#"):
@@ -81,6 +86,11 @@ class Lexer:
 
         return Token(type=token_type, start_index=start, value=value or self._source[start:self._index])
 
+    def next_non_space(self) -> Token:
+        """Get the next non-whitespace token in source."""
+        self._consume_whitespace()
+        return self.next_token()
+
     def _advance(self, n: int = 1) -> None:
         # Don't check for end of source. This is checked by the lexer anyway
         self._index += n
@@ -93,15 +103,8 @@ class Lexer:
         return seq == self._source[self._index:self._index + len(seq)]
 
     def _consume_whitespace(self) -> None:
-        while not self._is_at_end():
-            # Match any whitespace characters
-            if self._match(" "):
-                continue
-            if self._match("\t"):
-                continue
-            if self._match("\n"):
-                continue
-            return  # No more whitespaces found
+        while self._peek().isspace():
+            self._advance()
 
     def _is_reserved(self) -> bool:
         return self._check("~{") or self._peek() in "'\"{}()#"

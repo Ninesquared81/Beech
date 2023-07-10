@@ -126,11 +126,22 @@ class Lexer:
         while not self._is_at_end():
             if self._match("\\"):
                 out_string += self._source[start_index:self._index - 1]
-                start_index = self._index + 1  # Index of character after escape character.
+                start_index = self._index + 1  # Index of character after escape sequence
                 if self._check("\n"):
                     continue  # Handle the multiline string separately.
-                # Note: generator expression used for lazy evaluation.
-                if not any(self._match(c) for c in "'\"\\nrtb"):
+                if self._match("'") or self._match('"') or self._match("\\"):
+                    start_index -= 1  # Index of escaped character
+                elif self._match("n"):
+                    out_string += "\n"
+                elif self._match("r"):
+                    out_string += "\r"
+                elif self._match("t"):
+                    out_string += "\t"
+                elif self._match("f"):
+                    out_string += "\f"
+                elif self._match("\b"):
+                    out_string += "\b"
+                else:
                     raise LexError("Invalid escape sequence.")
             elif self._match(opener):
                 out_string += self._source[start_index:self._index - 1]
@@ -139,9 +150,9 @@ class Lexer:
                 # Multiline string.
                 out_string += self._source[start_index:self._index]
                 self._consume_whitespace()
-                start_index = self._index
                 if not self._is_at_end() and (self._match("'") or self._match('"')):
                     opener = self._previous()
+                    start_index = self._index
                 else:
                     raise LexError("Unterminated string literal.")
             elif self._peek().isprintable():

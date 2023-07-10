@@ -163,16 +163,11 @@ class Lexer:
 
         raise LexError("Unterminated string literal.")
 
-    def _comment(self) -> None:
-        if self._match("{"):
-            self._comment_block()
-        else:
-            self._comment_line()
-
     def _comment_block(self) -> None:
         while not self._match("}~"):
             if self._match("~{"):
                 self._comment_block()
+            self._advance()
 
     def _comment_line(self) -> None:
         while not self._is_at_end() and not self._check("\n"):

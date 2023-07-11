@@ -32,6 +32,10 @@ class Token:
     start_index: int
     value: str
 
+    @classmethod
+    def empty(cls):
+        return cls(type=TokenType.EMPTY, start_index=0, value="")
+
 
 class Lexer:
     """A class to lex Beech source files on the fly."""
@@ -87,11 +91,6 @@ class Lexer:
             raise LexError(f"Invalid character {self._peek()}")
 
         return Token(type=token_type, start_index=start, value=value or self._source[start:self._index])
-
-    def next_non_space(self) -> Token:
-        """Get the next non-whitespace token in source."""
-        self._consume_whitespace()
-        return self.next_token()
 
     def _advance(self, n: int = 1) -> None:
         # Don't check for end of source. This is checked by the lexer anyway

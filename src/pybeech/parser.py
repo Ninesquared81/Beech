@@ -5,7 +5,7 @@ from .types import Tree
 
 
 class Parser:
-    def __int__(self, source: str):
+    def __init__(self, source: str):
         self._lexer = Lexer(source)
 
     def parse(self) -> Tree:

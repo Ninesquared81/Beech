@@ -3,3 +3,7 @@
 
 class LexError(Exception):
     """Exception raised when a syntactical error occurs."""
+
+
+class ParseError(Exception):
+    """Exception raised in parsing."""

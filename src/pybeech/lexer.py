@@ -148,10 +148,23 @@ class Lexer:
                     out_string += "\r"
                 elif self._match("t"):
                     out_string += "\t"
+                elif self._match("v"):
+                    out_string += "\v"
                 elif self._match("f"):
                     out_string += "\f"
-                elif self._match("\b"):
+                elif self._match("a"):
+                    out_string += "\a"
+                elif self._match("b"):
                     out_string += "\b"
+                elif self._match("x"):
+                    out_string += self._parse_hex(2)
+                    start_index += 2
+                elif self._match("u"):
+                    out_string += self._parse_hex(4)
+                    start_index += 4
+                elif self._match("U"):
+                    out_string += self._parse_hex(8)
+                    start_index += 8
                 else:
                     raise LexError("Invalid escape sequence.")
             elif self._match(opener):
@@ -186,3 +199,12 @@ class Lexer:
     def _symbol(self) -> None:
         while self._is_symbolic():
             self._advance()
+
+    def _parse_hex(self, length: int) -> str:
+        digits = self._source[self._index:self._index + length]
+        x = bytearray(4)
+        try:
+            x[4 - length//2:] = bytes.fromhex(digits)
+        except ValueError:
+            raise LexError(f"Invalid hex escape sequence in string literal '{digits}'")
+        return x.decode(encoding="utf-32-be")

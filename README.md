@@ -22,8 +22,14 @@ A string literal is delimited by matching quote marks (either double `"` or sing
 * `\\` &ndash; backslash
 * `\n` &ndash; newline
 * `\r` &ndash; carriage return
-* `\t` &ndash; tab
-* `\0` &ndash; NUL byte
+* `\t` &ndash; horizontal tab
+* `\v` &ndash; vertical tab
+* `\f` &ndash; form feed
+* `\a` &ndash; alert (BEL)
+* `\b` &ndash; backspace
+* `\x`_hh_ &ndash; hexadecimal byte
+* `\u`_hhhh_ &ndash; 2-byte (hexadecimal) unicode codepoint
+* `\U`_hhhhhhhh_ &ndash; 4-byte (hexadecimal) unicode codepoint
 
 ### Symbols
 Any other sequence of non-space, non-reserved, printable characters is a _symbol_.

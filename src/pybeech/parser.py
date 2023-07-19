@@ -77,8 +77,11 @@ class Parser:
         if not self._match(token_type):
             raise ParseError(f"Expected {token_type} but got {self._current_token.type}")
 
+    def _check(self, token_type: TokenType) -> bool:
+        return self._current_token.type == token_type
+
     def _match(self, token_type: TokenType) -> bool:
-        if not self._current_token.type == token_type:
+        if not self._check(token_type):
             return False
 
         self._advance()

@@ -1,5 +1,6 @@
 __all__ = [
+    "errors",
     "lexer",
-    "beech_token.py",
     "parser",
+    "beech_types",
 ]

@@ -1,5 +1,9 @@
-"""Exceptions used when lexing and parsing Beech source code"""
+"""Module containing all exceptions raised by the package."""
 
 
-class BeechSyntaxError(Exception):
-    """Class representing a syntax error in Beech code"""
+class LexError(Exception):
+    """Exception raised when a syntactical error occurs."""
+
+
+class ParseError(Exception):
+    """Exception raised in parsing."""

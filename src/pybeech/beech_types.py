@@ -56,7 +56,7 @@ class List:
     def comments(self) -> list[Token]:
         return self._comments[:]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<List: comments={self._comments}, data={self._data}>"
 
 

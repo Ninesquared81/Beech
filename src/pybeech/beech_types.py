@@ -1,7 +1,8 @@
 """Module containing all the runtime types of Beech."""
 from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Union
+import typing
 
 from .lexer import Token
 
@@ -60,4 +61,4 @@ class List:
         return f"<List: comments={self._comments}, data={self._data}>"
 
 
-Value = Union[str, Tree, List]
+Value = typing.Union[str, Tree, List]

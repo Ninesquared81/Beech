@@ -56,5 +56,8 @@ class List:
     def comments(self) -> list[Token]:
         return self._comments[:]
 
+    def __repr__(self):
+        return f"<List: comments={self._comments}, data={self._data}>"
+
 
 Value = Union[str, Tree, List]

@@ -17,6 +17,11 @@ string "This is a
        "which includes escaped \
        'characters.
        "\t\x00 \x37 \u0041\b\f\a\v"
+list (
+    "this" is a
+    list of ~{comment}~
+    many, (items)
+)
 """
 lexer = Lexer(source)
 

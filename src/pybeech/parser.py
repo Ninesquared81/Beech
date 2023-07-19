@@ -11,7 +11,7 @@ class Parser:
         self._lexer = Lexer(source)
         self._current_token: Token = self._lexer.next_token()  # Start with the first token.
         self._previous_token: Token = Token.empty()  # Initialise with an empty token to avoid using None.
-        self._current_tree: Tree = Tree()
+        self._current_tree: Tree | List = Tree()
 
     def parse(self) -> Tree:
         """Parse the source code."""
@@ -42,7 +42,19 @@ class Parser:
         return new_tree
 
     def _list(self) -> List:
-        pass
+        new_list = List()
+        previous_tree = self._current_tree
+        self._current_tree = new_list
+        while not self._check(TokenType.RIGHT_BRACKET) and not self._check(TokenType.EMPTY):
+            new_list.add_value(self._value())
+            if not self._consume_comment():
+                if self._check(TokenType.RIGHT_BRACKET):
+                    break
+                else:
+                    raise ParseError("List values must be separated by whitespace.")
+        self._expect(TokenType.RIGHT_BRACKET)
+        self._current_tree = previous_tree
+        return new_list
 
     def _value(self) -> Value:
         self._consume_comment()

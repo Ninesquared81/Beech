@@ -60,7 +60,7 @@ class Parser:
         if self._match(TokenType.STRING):
             return self._previous_token.value
         elif self._match(TokenType.SYMBOL):
-            return self._previous_token.value
+            return Symbol(self._previous_token.value)
         elif self._match(TokenType.LEFT_BRACE):
             return self._tree()
         elif self._match(TokenType.LEFT_BRACKET):

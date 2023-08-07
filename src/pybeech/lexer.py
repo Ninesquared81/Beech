@@ -16,7 +16,6 @@ class TokenType(enum.Enum):
     RIGHT_BRACKET = "')' token"
     STRING = "string token"
     SYMBOL = "symbol token"
-    COMMENT = "comment token"
     WHITESPACE = "whitespace token"
 
     EMPTY = "empty token"
@@ -56,6 +55,8 @@ class Lexer:
 
     def next_token(self) -> Token:
         """Get the next valid token in source."""
+        self._consume_comments()
+
         token_type: TokenType = TokenType.EMPTY
         start: int = self._index
         value: str = ""
@@ -68,12 +69,6 @@ class Lexer:
         elif self._match('"') or self._match("'"):
             token_type = TokenType.STRING
             value = self._string()
-        elif self._match("#"):
-            token_type = TokenType.COMMENT
-            self._comment_line()
-        elif self._match("~{"):
-            token_type = TokenType.COMMENT
-            self._comment_block()
         elif self._match("}~"):
             raise LexError("Unmatched '}~'")
         elif self._is_symbolic():
@@ -103,9 +98,19 @@ class Lexer:
         # Note: slice will be empty if already at the end.
         return seq == self._source[self._index:self._index + len(seq)]
 
+    def _consume_comments(self) -> None:
+        while not self._is_at_end():
+            if self._match("#"):
+                self._comment_line()
+            elif self._match("~{"):
+                self._comment_block()
+            else:
+                break
+
     def _consume_whitespace(self) -> None:
         while self._peek().isspace():
             self._advance()
+            self._consume_comments()
 
     def _is_reserved(self) -> bool:
         return self._check("~{") or self._peek() in "'\"{}()#"

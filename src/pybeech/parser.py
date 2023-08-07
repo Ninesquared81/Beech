@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from .errors import ParseError
 from .lexer import Lexer, Token, TokenType
-from .beech_types import Tree, Key, Value, List
+from .beech_types import Tree, Key, Value, List, Symbol
 
 
 class Parser:
@@ -11,29 +11,32 @@ class Parser:
         self._lexer = Lexer(source)
         self._current_token: Token = self._lexer.next_token()  # Start with the first token.
         self._previous_token: Token = Token.empty()  # Initialise with an empty token to avoid using None.
-        self._current_tree: Tree | List = Tree()
+        self._current_tree: Tree | List = {}
 
     def parse(self) -> Tree:
         """Parse the source code."""
         return self._beech()
 
     def _beech(self) -> Tree:
-        while self._current_token.type != TokenType.EMPTY:
-            self._consume_comment()
+        while not self._check(TokenType.EMPTY):
             self._consume_whitespace()
-            if self._match(TokenType.SYMBOL) or self._match(TokenType.STRING):
-                key = Key(self._previous_token)
-                if not self._consume_comment():
-                    raise ParseError(f"Expected {TokenType.WHITESPACE}.")
-                value = self._value()
-                self._current_tree.insert_kv_pair(key, value)
+            key: Key
+            if self._match(TokenType.SYMBOL):
+                key = Symbol(self._previous_token.value)
+            elif self._match(TokenType.STRING):
+                key = self._previous_token.value
             else:
                 break  # End of tree.
+            self._consume_whitespace(strict=True)
+            value = self._value()
+            if key in self._current_tree:
+                raise ParseError("Keys in a tree must be unique.")
+            self._current_tree[key] = value
         return self._current_tree
 
     def _tree(self) -> Tree:
         previous_tree = self._current_tree
-        new_tree = Tree()
+        new_tree: Tree = {}
         self._current_tree = new_tree
         self._beech()
         self._current_tree = previous_tree
@@ -42,27 +45,23 @@ class Parser:
         return new_tree
 
     def _list(self) -> List:
-        new_list = List()
+        new_list: List = []
         previous_tree = self._current_tree
         self._current_tree = new_list
+        self._consume_whitespace()
         while not self._check(TokenType.RIGHT_BRACKET) and not self._check(TokenType.EMPTY):
-            new_list.add_value(self._value())
-            if not self._consume_comment():
-                if self._check(TokenType.RIGHT_BRACKET):
-                    break
-                else:
-                    raise ParseError("List values must be separated by whitespace.")
+            new_list.append(self._value())
+            if not self._check(TokenType.RIGHT_BRACKET):
+                self._consume_whitespace(strict=True)
         self._expect(TokenType.RIGHT_BRACKET)
         self._current_tree = previous_tree
         return new_list
 
     def _value(self) -> Value:
-        self._consume_comment()
-        self._consume_whitespace()
         if self._match(TokenType.STRING):
             return self._previous_token.value
         elif self._match(TokenType.SYMBOL):
-            return self._previous_token.value
+            return Symbol(self._previous_token.value)
         elif self._match(TokenType.LEFT_BRACE):
             return self._tree()
         elif self._match(TokenType.LEFT_BRACKET):
@@ -74,16 +73,9 @@ class Parser:
         self._previous_token = self._current_token
         self._current_token = self._lexer.next_token()
 
-    def _consume_comment(self) -> bool:
-        consumed_space = self._match(TokenType.WHITESPACE)
-        while self._match(TokenType.COMMENT):
-            self._current_tree.add_comment(self._previous_token)
-            # Note: `or` args must be this way due to short-circuiting
-            consumed_space = self._match(TokenType.WHITESPACE) or consumed_space
-        return consumed_space
-
-    def _consume_whitespace(self) -> None:
-        self._match(TokenType.WHITESPACE)  # Consume any whitespace.
+    def _consume_whitespace(self, strict=False) -> None:
+        if not self._match(TokenType.WHITESPACE) and strict:
+            raise ParseError(f"Expect {TokenType.WHITESPACE}")
 
     def _expect(self, token_type: TokenType) -> None:
         if not self._match(token_type):

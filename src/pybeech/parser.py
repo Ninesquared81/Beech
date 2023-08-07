@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from .errors import ParseError
 from .lexer import Lexer, Token, TokenType
-from .beech_types import Tree, Key, Value, List
+from .beech_types import Tree, Key, Value, List, Symbol
 
 
 class Parser:
@@ -11,7 +11,7 @@ class Parser:
         self._lexer = Lexer(source)
         self._current_token: Token = self._lexer.next_token()  # Start with the first token.
         self._previous_token: Token = Token.empty()  # Initialise with an empty token to avoid using None.
-        self._current_tree: Tree | List = Tree()
+        self._current_tree: Tree | List = {}
 
     def parse(self) -> Tree:
         """Parse the source code."""
@@ -20,15 +20,18 @@ class Parser:
     def _beech(self) -> Tree:
         while not self._check(TokenType.EMPTY):
             self._consume_whitespace()
-            if self._match(TokenType.SYMBOL) or self._match(TokenType.STRING):
-                key = Key(self._previous_token)
-                self._consume_whitespace(strict=True)
-                value = self._value()
-                if key in self._current_tree:
-                    raise ParseError("Keys in a tree must be unique.")
-                self._current_tree[key] = value
+            key: Key
+            if self._match(TokenType.SYMBOL):
+                key = Symbol(self._previous_token.value)
+            elif self._match(TokenType.STRING):
+                key = self._previous_token.value
             else:
                 break  # End of tree.
+            self._consume_whitespace(strict=True)
+            value = self._value()
+            if key in self._current_tree:
+                raise ParseError("Keys in a tree must be unique.")
+            self._current_tree[key] = value
         return self._current_tree
 
     def _tree(self) -> Tree:

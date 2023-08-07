@@ -55,13 +55,13 @@ class Lexer:
 
     def next_token(self) -> Token:
         """Get the next valid token in source."""
+        self._consume_comments()
+
         token_type: TokenType = TokenType.EMPTY
         start: int = self._index
         value: str = ""
 
         # An empty token is returned if already at the end of tokens.
-
-        self._consume_comments()
 
         if self._peek().isspace():
             token_type = TokenType.WHITESPACE
@@ -110,6 +110,7 @@ class Lexer:
     def _consume_whitespace(self) -> None:
         while self._peek().isspace():
             self._advance()
+            self._consume_comments()
 
     def _is_reserved(self) -> bool:
         return self._check("~{") or self._peek() in "'\"{}()#"

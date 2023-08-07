@@ -48,6 +48,7 @@ class Parser:
         new_list: List = []
         previous_tree = self._current_tree
         self._current_tree = new_list
+        self._consume_whitespace()
         while not self._check(TokenType.RIGHT_BRACKET) and not self._check(TokenType.EMPTY):
             new_list.append(self._value())
             if not self._check(TokenType.RIGHT_BRACKET):

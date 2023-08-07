@@ -1,19 +1,21 @@
 """Module containing all the runtime types of Beech."""
 from __future__ import annotations
 
-from dataclasses import dataclass
 import typing
 
-from .lexer import Token
 
+class Symbol:
+    def __init__(self, value: str) -> None:
+        self._value = value
 
-@dataclass
-class Key:
-    token: Token
+    def __repr__(self) -> str:
+        return f"Symbol('{self._value}')"
 
-    def __hash__(self):
-        return hash(self.token.value)
+    def __str__(self) -> str:
+        return self._value
 
+    def __hash__(self) -> int:
+        return hash(self._value)
 
 Value = typing.Union[str, 'Tree', 'List']
 Tree = dict[Key, Value]

@@ -16,7 +16,6 @@ class TokenType(enum.Enum):
     RIGHT_BRACKET = "')' token"
     STRING = "string token"
     SYMBOL = "symbol token"
-    COMMENT = "comment token"
     WHITESPACE = "whitespace token"
 
     EMPTY = "empty token"
@@ -62,18 +61,14 @@ class Lexer:
 
         # An empty token is returned if already at the end of tokens.
 
+        self._consume_comments()
+
         if self._peek().isspace():
             token_type = TokenType.WHITESPACE
             self._consume_whitespace()
         elif self._match('"') or self._match("'"):
             token_type = TokenType.STRING
             value = self._string()
-        elif self._match("#"):
-            token_type = TokenType.COMMENT
-            self._comment_line()
-        elif self._match("~{"):
-            token_type = TokenType.COMMENT
-            self._comment_block()
         elif self._match("}~"):
             raise LexError("Unmatched '}~'")
         elif self._is_symbolic():
@@ -102,6 +97,15 @@ class Lexer:
     def _check(self, seq: str):
         # Note: slice will be empty if already at the end.
         return seq == self._source[self._index:self._index + len(seq)]
+
+    def _consume_comments(self) -> None:
+        while not self._is_at_end():
+            if self._match("#"):
+                self._comment_line()
+            elif self._match("~{"):
+                self._comment_block()
+            else:
+                break
 
     def _consume_whitespace(self) -> None:
         while self._peek().isspace():

@@ -17,6 +17,8 @@ class Symbol:
     def __hash__(self) -> int:
         return hash(self._value)
 
-Value = typing.Union[str, 'Tree', 'List']
+
+Key = typing.Union[str, Symbol]
+Value = typing.Union[Key, 'Tree', 'List']
 Tree = dict[Key, Value]
 List = list[Value]

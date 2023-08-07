@@ -3,5 +3,4 @@ __all__ = [
     "lexer",
     "parser",
     "beech_types",
-    "evaluator",
 ]

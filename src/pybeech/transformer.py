@@ -5,8 +5,8 @@ from typing import Callable, TypeVar
 
 from .beech_types import Symbol, Key, Value
 
+
 T = TypeVar("T")
-U = TypeVar("U")
 Transform = Callable[[T], T]
 
 

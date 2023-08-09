@@ -14,8 +14,8 @@ def transformer(transform_symbol: Transform[Symbol] | None = None,
                 transform_string: Transform[str] | None = None) -> Transform[Value]:
     """Return a transformation function for Beech values based on transformation rules for keys.
 
-    :param transform_symbol: rule for transforming symbols into other symbols
-    :param transform_string: rule for transforming strings into other strings
+    :param transform_symbol: (optional) rule for transforming symbols into other symbols
+    :param transform_string: (optional) rule for transforming strings into other strings
 
     :return: inferred transformation rule for any Beech value
     """

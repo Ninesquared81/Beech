@@ -27,6 +27,7 @@ def transformer(transform_symbol: Transform[Symbol] | None = None,
         transform_string = _identity
 
     def transform_key(key: Key) -> Key:
+        # Transform a Beech key (symbol or string).
         if isinstance(key, Symbol):
             return transform_symbol(key)
         if isinstance(key, str):
@@ -34,6 +35,7 @@ def transformer(transform_symbol: Transform[Symbol] | None = None,
         raise TypeError(f"Unexpected key type: {type(key)}")
 
     def transform_value(value: Value) -> Value:
+        # Transform a Beech value based on the rules provided.
         if isinstance(value, Symbol):
             return transform_symbol(value)
         if isinstance(value, str):

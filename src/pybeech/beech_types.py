@@ -9,10 +9,12 @@ class Symbol:
         self._value = value
 
     def __repr__(self) -> str:
-        return f"Symbol('{self._value}')"
+        # Use value's own `repr` method to reduce assumptions.
+        return f"{type(self).__name__}({repr(self._value)})"
 
     def __str__(self) -> str:
-        return self._value
+        # Wrap in an extra call to `str` in case a subclass changes the value type
+        return str(self._value)
 
     def __hash__(self) -> int:
         return hash(self._value)

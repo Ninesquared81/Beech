@@ -20,6 +20,7 @@ def transformer(transform_symbol: Transform[Symbol] | None = None,
     :return: inferred transformation rule for any Beech value
     """
     def _identity(_x: T) -> T: return _x
+
     if transform_symbol is None:
         transform_symbol = _identity
     if transform_string is None:

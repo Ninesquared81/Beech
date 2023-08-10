@@ -12,7 +12,7 @@ class Date:
     day: int
 
     def __str__(self) -> str:
-        return f"{self.year}-{self.month:02}-{self.day:02}"
+        return f"{self.year:04}-{self.month:02}-{self.day:02}"
 
     def __hash__(self) -> int:
         return hash(str(self))

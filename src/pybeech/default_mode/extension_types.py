@@ -5,6 +5,8 @@ from dataclasses import dataclass
 
 @dataclass
 class Date:
+    """ISO 8601 date."""
+
     year: int
     month: int
     day: int

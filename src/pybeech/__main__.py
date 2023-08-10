@@ -27,6 +27,7 @@ list (
     many, (items)
 )
 number 42
+date 2023-08-10
 """
 lexer = Lexer(source)
 

@@ -1,6 +1,8 @@
 """Module containing the default symbol transformations."""
 from __future__ import annotations
 
+import re
+
 from src.pybeech.beech_types import Symbol
 
 
@@ -31,9 +33,28 @@ class NumberSymbol(Symbol):
 class DateSymbol(Symbol):
     """Symbol representing a date in the ISO 8601 format."""
 
+    def __init__(self, year: int, month: int, day: int):
+        super().__init__("")
+
+        from dataclasses import dataclass
+
+        @dataclass
+        class Date:
+            year: int
+            month: int
+            day: int
+
+        self._value = Date(year, month, day)
+
     @classmethod
     def try_parse(cls, value: str) -> DateSymbol | None:
         """Try to parse the value as an ISO 8601 date, or return None if failed."""
+        date_match = re.match(
+            r"(?P<year>[0-9]{4})-(?P<month>0[1-9]|1[0-2])-(?P<day>0[1-9]|[12][0-9]|3[01])",
+            value)
+        if date_match is None:
+            return None
+        return cls(**{k: int(v) for k, v in date_match.groupdict().items()})
 
 
 EXTENDED_SYMBOLS = [

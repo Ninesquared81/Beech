@@ -1,20 +1,14 @@
 """Module containing the default symbol transformations."""
-import enum
+from __future__ import annotations
 
 from src.pybeech.beech_types import Symbol
-
-
-class SymbolType(enum.Enum):
-    NUMBER = "number"
-    DATE = "date-iso8601"
-    TEXT = "text"
 
 
 class TextSymbol(Symbol):
     """Symbol which is purely textual."""
 
     @classmethod
-    def from_base_symbol(cls, symbol: Symbol) -> 'TextSymbol':
+    def from_base_symbol(cls, symbol: Symbol) -> TextSymbol:
         return cls(str(symbol))
 
 
@@ -25,22 +19,33 @@ class NumberSymbol(Symbol):
         super().__init__("")  # Dummy value
         self._value = value
 
+    @classmethod
+    def try_parse(cls, value: str) -> NumberSymbol | None:
+        """Try to parse the value as a number, or return None if failed."""
+        try:
+            return cls(int(value, base=0))
+        except ValueError:
+            return None
+
 
 class DateSymbol(Symbol):
     """Symbol representing a date in the ISO 8601 format."""
 
+    @classmethod
+    def try_parse(cls, value: str) -> DateSymbol | None:
+        """Try to parse the value as an ISO 8601 date, or return None if failed."""
 
-class Parser:
+
+EXTENDED_SYMBOLS = [
+    NumberSymbol,
+    DateSymbol,
+]
+
+
+def parse_symbol(symbol: Symbol) -> Symbol:
     """Parse a symbol into its corresponding default mode subtype."""
-
-    def __init__(self, symbol: Symbol) -> None:
-        self._symbol = symbol
-        self._options: set[SymbolType] = {t for t in SymbolType}
-        self._index = 0
-
-    def parse(self) -> Symbol:
-        assert len(self._options) > 0
-        while len(self._options) > 1:
-            pass
-        assert self._options == {SymbolType.TEXT}
-        return TextSymbol(str(self._symbol))
+    value = str(symbol)
+    for cls in EXTENDED_SYMBOLS:
+        if (sym := cls.try_parse(value)) is not None:
+            return sym
+    return TextSymbol(value)

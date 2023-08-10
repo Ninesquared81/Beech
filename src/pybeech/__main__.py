@@ -28,6 +28,7 @@ list (
 )
 number 42
 date 2023-08-10
+"not a date" abc2023-08-10efg
 """
 lexer = Lexer(source)
 

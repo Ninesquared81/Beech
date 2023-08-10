@@ -4,6 +4,7 @@ from __future__ import annotations
 import re
 
 from src.pybeech.beech_types import Symbol
+from .extension_types import Date
 
 
 class TextSymbol(Symbol):
@@ -35,15 +36,6 @@ class DateSymbol(Symbol):
 
     def __init__(self, year: int, month: int, day: int):
         super().__init__("")
-
-        from dataclasses import dataclass
-
-        @dataclass
-        class Date:
-            year: int
-            month: int
-            day: int
-
         self._value = Date(year, month, day)
 
     @classmethod

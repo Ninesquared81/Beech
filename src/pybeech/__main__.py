@@ -2,6 +2,7 @@
 from typing import Union
 
 from src.pybeech.beech_types import Symbol
+from src.pybeech.default_mode.extension_types import Date
 from src.pybeech.default_mode.symbol_parser import parse_symbol
 from src.pybeech.lexer import Lexer
 from src.pybeech.parser import Parser
@@ -57,3 +58,6 @@ print(tree)
 
 trans = transformer(transform_symbol=parse_symbol)
 print(trans(tree))
+
+date = Date(2023, 8, 10)
+print(date, repr(date))

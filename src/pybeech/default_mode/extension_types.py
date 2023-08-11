@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 class StrHashMixin:
     """Mixin for a class whose hash is just that of its string value."""
+
     def __hash__(self) -> int:
         return hash(str(self))
 

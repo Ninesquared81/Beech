@@ -16,7 +16,6 @@ class TokenType(enum.Enum):
     RIGHT_BRACKET = "')' token"
     STRING = "string token"
     SYMBOL = "symbol token"
-    WHITESPACE = "whitespace token"
 
     EMPTY = "empty token"
 
@@ -30,10 +29,11 @@ class Token:
     type: TokenType
     start_index: int
     value: str
+    has_whitespace_before: bool
 
     @classmethod
     def empty(cls):
-        return cls(type=TokenType.EMPTY, start_index=0, value="")
+        return cls(type=TokenType.EMPTY, start_index=0, value="", has_whitespace_before=False)
 
 
 class Lexer:
@@ -41,6 +41,7 @@ class Lexer:
     def __init__(self, source: str) -> None:
         self._source: str = source
         self._index: int = 0
+        self._has_whitespace_before: bool = False
 
     def __iter__(self):
         return self
@@ -55,7 +56,8 @@ class Lexer:
 
     def next_token(self) -> Token:
         """Get the next valid token in source."""
-        self._consume_comments()
+        self._has_whitespace_before = False
+        self._consume_whitespace()
 
         token_type: TokenType = TokenType.EMPTY
         start: int = self._index
@@ -63,14 +65,11 @@ class Lexer:
 
         # An empty token is returned if already at the end of tokens.
 
-        if self._peek().isspace():
-            token_type = TokenType.WHITESPACE
-            self._consume_whitespace()
+        if self._match("}~"):
+            raise LexError("Unmatched '}~'")
         elif self._match('"') or self._match("'"):
             token_type = TokenType.STRING
             value = self._string()
-        elif self._match("}~"):
-            raise LexError("Unmatched '}~'")
         elif self._is_symbolic():
             token_type = TokenType.SYMBOL
             self._symbol()
@@ -85,7 +84,8 @@ class Lexer:
         elif not self._is_at_end():
             raise LexError(f"Invalid character {self._peek()}")
 
-        return Token(type=token_type, start_index=start, value=value or self._source[start:self._index])
+        return Token(type=token_type, start_index=start, value=(value or self._source[start:self._index]),
+                     has_whitespace_before=self._has_whitespace_before)
 
     def _advance(self, n: int = 1) -> None:
         # Don't check for end of source. This is checked by the lexer anyway
@@ -109,6 +109,7 @@ class Lexer:
 
     def _consume_whitespace(self) -> None:
         while self._peek().isspace():
+            self._has_whitespace_before = True
             self._advance()
             self._consume_comments()
 

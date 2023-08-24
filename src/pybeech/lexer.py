@@ -129,7 +129,8 @@ class Lexer:
             self._consume_comments()
 
     def _is_reserved(self) -> bool:
-        return self._check("~{") or self._peek() in "'\"{}()#"
+        # Note: the check for "}" includes a closing "}~"
+        return self._check_any("~{", "'", '"', "{", "}", "(", ")", "#")
 
     def _is_symbolic(self) -> bool:
         if self._is_at_end():

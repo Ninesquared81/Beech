@@ -30,10 +30,12 @@ class Token:
     start_index: int
     value: str
     has_whitespace_before: bool
+    preceding_comments: list[str]
 
     @classmethod
     def empty(cls):
-        return cls(type=TokenType.EMPTY, start_index=0, value="", has_whitespace_before=False)
+        return cls(type=TokenType.EMPTY, start_index=0, value="",
+                   has_whitespace_before=False, preceding_comments=[])
 
 
 class Lexer:
@@ -42,6 +44,7 @@ class Lexer:
         self._source: str = source
         self._index: int = 0
         self._has_whitespace_before: bool = False
+        self._preceding_comments: list[str] = []
 
     def __iter__(self):
         return self
@@ -57,6 +60,7 @@ class Lexer:
     def next_token(self) -> Token:
         """Get the next valid token in source."""
         self._has_whitespace_before = False
+        self._preceding_comments = []
         self._consume_whitespace()
 
         token_type: TokenType = TokenType.EMPTY
@@ -84,8 +88,11 @@ class Lexer:
         elif not self._is_at_end():
             raise LexError(f"Invalid character {self._peek()}")
 
-        return Token(type=token_type, start_index=start, value=(value or self._source[start:self._index]),
-                     has_whitespace_before=self._has_whitespace_before)
+        return Token(type=token_type,
+                     start_index=start,
+                     value=(value or self._source[start:self._index]),
+                     has_whitespace_before=self._has_whitespace_before,
+                     preceding_comments=self._preceding_comments)
 
     def _advance(self, n: int = 1) -> None:
         # Don't check for end of source. This is checked by the lexer anyway
@@ -98,7 +105,14 @@ class Lexer:
         # Note: slice will be empty if already at the end.
         return seq == self._source[self._index:self._index + len(seq)]
 
+    def _check_any(self, *seqs: str):
+        return any(self._check(seq) for seq in seqs)
+
     def _consume_comments(self) -> None:
+        if not self._check_any("#", "~{"):
+            # Early return if there are no comments.
+            return
+        start = self._index
         while not self._is_at_end():
             if self._match("#"):
                 self._comment_line()
@@ -106,6 +120,7 @@ class Lexer:
                 self._comment_block()
             else:
                 break
+        self._preceding_comments.append(self._source[start:self._index])
 
     def _consume_whitespace(self) -> None:
         while self._peek().isspace():

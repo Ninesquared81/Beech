@@ -122,9 +122,11 @@ class Lexer:
                 break
         self._preceding_comments.append(self._source[start:self._index])
 
-    def _consume_whitespace(self) -> None:
-        while self._peek().isspace():
+    def _consume_whitespace(self, report: bool = True) -> None:
+        if report and self._peek().isspace():
             self._has_whitespace_before = True
+
+        while self._peek().isspace():
             self._advance()
             self._consume_comments()
 
@@ -199,7 +201,7 @@ class Lexer:
             elif self._match("\n"):
                 # Multiline string.
                 out_string += self._source[start_index:self._index]
-                self._consume_whitespace()
+                self._consume_whitespace(report=False)
                 if self._match_any("'", '"'):
                     opener = self._previous()
                     start_index = self._index

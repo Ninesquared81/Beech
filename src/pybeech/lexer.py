@@ -71,7 +71,7 @@ class Lexer:
 
         if self._match("}~"):
             raise LexError("Unmatched '}~'")
-        elif self._match('"') or self._match("'"):
+        elif self._match_any('"', "'"):
             token_type = TokenType.STRING
             value = self._string()
         elif self._is_symbolic():
@@ -166,7 +166,7 @@ class Lexer:
                 start_index = self._index + 1  # Index of character after escape sequence
                 if self._check("\n"):
                     continue  # Handle the multiline string separately.
-                if self._match("'") or self._match('"') or self._match("\\"):
+                if self._match_any("'", '"', "\\"):
                     start_index -= 1  # Index of escaped character
                 elif self._match("n"):
                     out_string += "\n"
@@ -200,7 +200,7 @@ class Lexer:
                 # Multiline string.
                 out_string += self._source[start_index:self._index]
                 self._consume_whitespace()
-                if self._match("'") or self._match('"'):
+                if self._match_any("'", '"'):
                     opener = self._previous()
                     start_index = self._index
                 else:

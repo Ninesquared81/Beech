@@ -33,7 +33,7 @@ class Token:
     preceding_comments: list[str]
 
     @classmethod
-    def empty(cls):
+    def empty(cls) -> Token:
         return cls(type=TokenType.EMPTY, start_index=0, value="",
                    has_whitespace_before=False, preceding_comments=[])
 
@@ -46,10 +46,10 @@ class Lexer:
         self._has_whitespace_before: bool = False
         self._preceding_comments: list[str] = []
 
-    def __iter__(self):
+    def __iter__(self) -> Lexer:
         return self
 
-    def __next__(self):
+    def __next__(self) -> Token:
         if self._is_at_end():
             raise StopIteration
         return self.next_token()
@@ -71,7 +71,7 @@ class Lexer:
 
         if self._match("}~"):
             raise LexError("Unmatched '}~'")
-        elif self._match('"') or self._match("'"):
+        elif self._match_any('"', "'"):
             token_type = TokenType.STRING
             value = self._string()
         elif self._is_symbolic():
@@ -101,11 +101,11 @@ class Lexer:
     def _is_at_end(self) -> bool:
         return self._index >= len(self._source)
 
-    def _check(self, seq: str):
+    def _check(self, seq: str) -> bool:
         # Note: slice will be empty if already at the end.
         return seq == self._source[self._index:self._index + len(seq)]
 
-    def _check_any(self, *seqs: str):
+    def _check_any(self, *seqs: str) -> bool:
         return any(self._check(seq) for seq in seqs)
 
     def _consume_comments(self) -> None:
@@ -144,6 +144,10 @@ class Lexer:
         self._advance(len(seq))
         return True
 
+    def _match_any(self, *seqs: str) -> bool:
+        # Since this uses a generator, the sequences will be matched lazily.
+        return any(self._match(seq) for seq in seqs)
+
     def _peek(self) -> str:
         # Use a slice to return "" if already at end.
         return self._source[self._index:self._index + 1]
@@ -162,7 +166,7 @@ class Lexer:
                 start_index = self._index + 1  # Index of character after escape sequence
                 if self._check("\n"):
                     continue  # Handle the multiline string separately.
-                if self._match("'") or self._match('"') or self._match("\\"):
+                if self._match_any("'", '"', "\\"):
                     start_index -= 1  # Index of escaped character
                 elif self._match("n"):
                     out_string += "\n"
@@ -196,7 +200,7 @@ class Lexer:
                 # Multiline string.
                 out_string += self._source[start_index:self._index]
                 self._consume_whitespace()
-                if not self._is_at_end() and (self._match("'") or self._match('"')):
+                if self._match_any("'", '"'):
                     opener = self._previous()
                     start_index = self._index
                 else:
@@ -215,7 +219,7 @@ class Lexer:
             self._advance()
 
     def _comment_line(self) -> None:
-        while not self._is_at_end() and not self._check("\n"):
+        while not self._check("\n"):
             self._advance()
 
     def _symbol(self) -> None:

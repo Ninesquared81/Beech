@@ -46,7 +46,7 @@ class Lexer:
         self._has_whitespace_before: bool = False
         self._preceding_comments: list[str] = []
 
-    def __iter__(self):
+    def __iter__(self) -> Lexer:
         return self
 
     def __next__(self) -> Token:

@@ -101,11 +101,11 @@ class Lexer:
     def _is_at_end(self) -> bool:
         return self._index >= len(self._source)
 
-    def _check(self, seq: str):
+    def _check(self, seq: str) -> bool:
         # Note: slice will be empty if already at the end.
         return seq == self._source[self._index:self._index + len(seq)]
 
-    def _check_any(self, *seqs: str):
+    def _check_any(self, *seqs: str) -> bool:
         return any(self._check(seq) for seq in seqs)
 
     def _consume_comments(self) -> None:

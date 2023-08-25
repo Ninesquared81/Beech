@@ -33,7 +33,7 @@ class Token:
     preceding_comments: list[str]
 
     @classmethod
-    def empty(cls):
+    def empty(cls) -> Token:
         return cls(type=TokenType.EMPTY, start_index=0, value="",
                    has_whitespace_before=False, preceding_comments=[])
 

@@ -144,6 +144,10 @@ class Lexer:
         self._advance(len(seq))
         return True
 
+    def _match_any(self, *seqs: str) -> bool:
+        # Since this uses a generator, the sequences will be matched lazily.
+        return any(self._match(seq) for seq in seqs)
+
     def _peek(self) -> str:
         # Use a slice to return "" if already at end.
         return self._source[self._index:self._index + 1]

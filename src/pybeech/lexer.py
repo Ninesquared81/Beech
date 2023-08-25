@@ -196,7 +196,7 @@ class Lexer:
                 # Multiline string.
                 out_string += self._source[start_index:self._index]
                 self._consume_whitespace()
-                if not self._is_at_end() and (self._match("'") or self._match('"')):
+                if self._match("'") or self._match('"'):
                     opener = self._previous()
                     start_index = self._index
                 else:
@@ -215,7 +215,7 @@ class Lexer:
             self._advance()
 
     def _comment_line(self) -> None:
-        while not self._is_at_end() and not self._check("\n"):
+        while not self._check("\n"):
             self._advance()
 
     def _symbol(self) -> None:

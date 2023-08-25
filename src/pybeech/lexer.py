@@ -49,7 +49,7 @@ class Lexer:
     def __iter__(self):
         return self
 
-    def __next__(self):
+    def __next__(self) -> Token:
         if self._is_at_end():
             raise StopIteration
         return self.next_token()
